@@ -4,35 +4,103 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pl.sda.stats.company.Company;
+import pl.sda.stats.company.Sector;
 import pl.sda.stats.company.comparators.ByDividendCompanyComparator;
 import pl.sda.stats.company.comparators.ByPriceCompanyComparator;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 @AllArgsConstructor
 class SP500Statistics {
     private final List<Company> companies;
 
     List<Company> companiesWithHighestPrice(int i) {
-        return companies.stream().sorted(new ByPriceCompanyComparator())
+        return companies.stream()
+                .filter(company -> company.getSector() != Sector.UNKNOWN)
+                .sorted(new ByPriceCompanyComparator())
                 .limit(i).collect(Collectors.toList());
     }
 
     List<Company> companiesWithHighestDividendYield(int i) {
-        return companies.stream().sorted(new ByDividendCompanyComparator())
+        return companies.stream()
+                .filter(company -> company.getSector() != Sector.UNKNOWN)
+                .sorted(new ByDividendCompanyComparator())
                 .limit(i).collect(Collectors.toList());
     }
 
     List<CompanyWithDividend> companiesWithHighestDividend(int i) {
         return companies.stream()
+
+                .filter(company -> {
+                    Sector sector = company.getSector();
+                    return sector != Sector.UNKNOWN;
+
+                })
                 .map(CompanyWithDividend::fromCompany)
                 .sorted(Comparator.reverseOrder())
                 .limit(i)
                 .collect(Collectors.toList());
     }
+
+    public Map<Sector, Company> companyBySector() {
+        Map<Sector, Company> mapSectors = new HashMap<>();
+        for (Sector sector : Sector.values()) {
+            Optional<Company> bestCompany = bestCompanyInSector(sector);
+            bestCompany.ifPresent(company -> mapSectors.put(sector, company));
+        }
+        return mapSectors;
+
+    }
+
+    public Map<Sector, Company> companyBySector2() {
+        Map<Sector, List<Company>> sectorListMap = companies.stream()
+                .filter(company -> company.getSector() != Sector.UNKNOWN)
+                .collect(Collectors.groupingBy(Company::getSector));
+
+        Map<Sector, Company> result = new HashMap<>();
+        sectorListMap.entrySet().stream()
+                .forEach(entry -> {
+                    List<Company> companiesInSector = entry.getValue();
+                    bestCompanyInList(companiesInSector).ifPresent(company -> result.put(entry.getKey(), company));
+                });
+        return result;
+    }
+
+    public Map<Sector, Optional<Company>> companyBySector3() {
+        return companies.stream()
+                .filter(company -> company.getSector() != Sector.UNKNOWN)
+                .collect(Collectors.groupingBy(
+                        Company::getSector,
+                        Collectors.maxBy(
+                                Comparator.comparing(Company::getEbitda)
+                        )
+                ));
+    }
+
+    private Optional<Company> bestCompanyInList(List<Company> companyList) {
+        return companyList.stream()
+                .max(comparing(Company::getEbitda));
+    }
+
+    private Optional<Company> bestCompanyInSector(Sector sector) {
+        //return companies.stream()
+        //      .filter(company -> company.getSector().equals(sector))
+        //    .sorted(comparing(Company::getEbitda))
+        //  .limit(1)
+        //.findFirst();
+        List<Company> companiesInSector = companies.stream()
+                .filter(company -> company.getSector().equals(sector))
+                .collect(Collectors.toList());
+        return bestCompanyInList(companiesInSector);
+    }
+
+//map     sector   company
+    //sectors  map  hashmap
+// map  .put
 
 
 //

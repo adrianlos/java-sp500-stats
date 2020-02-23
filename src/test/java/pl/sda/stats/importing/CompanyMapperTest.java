@@ -1,13 +1,12 @@
-package pl.sda.stats;
+package pl.sda.stats.importing;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pl.sda.stats.company.Company;
 import pl.sda.stats.company.Sector;
-import pl.sda.stats.importing.CompanyMapper;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CompanyMapperTest {
 
@@ -28,7 +27,7 @@ class CompanyMapperTest {
         //when
         Company company = new CompanyMapper().fromLine(input).get();
         //then
-        assertEquals(expectedCompany, company);
+        Assertions.assertEquals(expectedCompany, company);
     }
 
 }
