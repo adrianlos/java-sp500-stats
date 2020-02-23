@@ -1,4 +1,6 @@
-package pl.sda.stats;
+package pl.sda.stats.importing;
+
+import pl.sda.stats.company.Company;
 
 import java.io.IOException;
 import java.nio.file.Files;

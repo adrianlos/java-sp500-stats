@@ -1,4 +1,4 @@
-package pl.sda.stats;
+package pl.sda.stats.company;
 
 import java.util.stream.Stream;
 

@@ -1,15 +1,18 @@
-package pl.sda.stats;
+package pl.sda.stats.importing;
+
+import pl.sda.stats.company.Company;
+import pl.sda.stats.company.Sector;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CompanyMapper {
-    Logger logger = Logger.getLogger(CompanyMapper.class.getName());
+class CompanyMapper {
+    private final Logger logger = Logger.getLogger(CompanyMapper.class.getName());
 
 
-    public Optional<Company> fromLine(String[] fields) {
+    Optional<Company> fromLine(String[] fields) {
         try {
             return Optional.of(
                     Company.builder()

@@ -1,6 +1,9 @@
 package pl.sda.stats;
 
 import org.junit.jupiter.api.Test;
+import pl.sda.stats.company.Company;
+import pl.sda.stats.company.Sector;
+import pl.sda.stats.importing.CompanyMapper;
 
 import java.math.BigDecimal;
 

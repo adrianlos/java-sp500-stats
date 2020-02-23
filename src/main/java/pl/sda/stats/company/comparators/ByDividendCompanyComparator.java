@@ -1,4 +1,6 @@
-package pl.sda.stats;
+package pl.sda.stats.company.comparators;
+
+import pl.sda.stats.company.Company;
 
 import java.util.Comparator;
 
