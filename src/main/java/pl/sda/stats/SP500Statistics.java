@@ -18,6 +18,13 @@ import static java.util.Comparator.comparing;
 class SP500Statistics {
     private final List<Company> companies;
 
+    /**
+     * Finds companies with highest share price, limits the findings to 'i' entries.
+     * Companies are searched only among known sectors.
+     *
+     * @param i number of highest priced companies to find
+     * @return 'i' highest priced companies
+     */
     List<Company> companiesWithHighestPrice(int i) {
         return companies.stream()
                 .filter(company -> company.getSector() != Sector.UNKNOWN)
@@ -25,6 +32,13 @@ class SP500Statistics {
                 .limit(i).collect(Collectors.toList());
     }
 
+    /**
+     * Finds companies with highest dividend yield, limits the findings to 'i' entries.
+     * Companies are searched only among known sectors.
+     *
+     * @param i number of companies to find
+     * @return 'i' companies with highest dividend yield
+     */
     List<Company> companiesWithHighestDividendYield(int i) {
         return companies.stream()
                 .filter(company -> company.getSector() != Sector.UNKNOWN)
@@ -32,76 +46,107 @@ class SP500Statistics {
                 .limit(i).collect(Collectors.toList());
     }
 
+    /**
+     * Finds companies with highest dividend amount per share,
+     * limits the findings to 'i' entries.
+     * Companies are searched only among known sectors.
+     *
+     * @param i number of companies to find
+     * @return 'i' companies with respective dividend amount
+     */
     List<CompanyWithDividend> companiesWithHighestDividend(int i) {
         return companies.stream()
-
-                .filter(company -> {
-                    Sector sector = company.getSector();
-                    return sector != Sector.UNKNOWN;
-
-                })
+                .filter(company -> company.getSector() != Sector.UNKNOWN)
                 .map(CompanyWithDividend::fromCompany)
                 .sorted(Comparator.reverseOrder())
                 .limit(i)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns highest earning company in each sector.
+     * Uses iterating over sectors approach.
+     *
+     * @return map of sector -> highest earning company
+     */
     public Map<Sector, Company> companyBySector() {
         Map<Sector, Company> mapSectors = new HashMap<>();
         for (Sector sector : Sector.values()) {
-            Optional<Company> bestCompany = bestCompanyInSector(sector);
+            Optional<Company> bestCompany = companyWithHighestEbitdaInSector(sector);
             bestCompany.ifPresent(company -> mapSectors.put(sector, company));
         }
         return mapSectors;
-
     }
 
+    /**
+     * Returns highest earning company in each sector.
+     * Uses approach of grouping to map of (sector -> list of companies).
+     * Then, the map is rewritten into other map with only highest earning company.
+     *
+     * @return map of (sector -> highest earning company)
+     */
     public Map<Sector, Company> companyBySector2() {
         Map<Sector, List<Company>> sectorListMap = companies.stream()
                 .filter(company -> company.getSector() != Sector.UNKNOWN)
                 .collect(Collectors.groupingBy(Company::getSector));
 
         Map<Sector, Company> result = new HashMap<>();
-        sectorListMap.entrySet().stream()
+        sectorListMap.entrySet()
                 .forEach(entry -> {
                     List<Company> companiesInSector = entry.getValue();
-                    bestCompanyInList(companiesInSector).ifPresent(company -> result.put(entry.getKey(), company));
+                    companyWithHighestEbitdaInList(companiesInSector).ifPresent(company -> result.put(entry.getKey(), company));
                 });
+
+        // alternative notation below
+        // here, the Entry<Sector, List<Company>> is unwrapped in lambda parameters
+        //
+        // sectorListMap.forEach((key, companiesInSector) -> companyWithHighestEbitdaInList(companiesInSector).ifPresent(company -> result.put(key, company)));
+
         return result;
     }
 
+    /**
+     * Returns highest earning company in each sector.
+     * Uses stream-based approach.
+     *
+     * @return map of (sector -> highest earning company wrapped in optional)
+     */
     public Map<Sector, Optional<Company>> companyBySector3() {
         return companies.stream()
                 .filter(company -> company.getSector() != Sector.UNKNOWN)
-                .collect(Collectors.groupingBy(
-                        Company::getSector,
-                        Collectors.maxBy(
-                                Comparator.comparing(Company::getEbitda)
+                .collect(Collectors.groupingBy( // collect companies by grouping
+                        Company::getSector, //group by sector
+                        Collectors.maxBy( // choose 'max' company in each sector
+                                Comparator.comparing(Company::getEbitda) // use 'ebitda' to compare companies
                         )
                 ));
     }
 
-    private Optional<Company> bestCompanyInList(List<Company> companyList) {
+    /**
+     * For given list returns company with highest EBITDA.
+     *
+     * @param companyList list to search in
+     * @return Optional wrapped around company with highest earnings,
+     * Optional.empty() if given list is empty
+     */
+    private Optional<Company> companyWithHighestEbitdaInList(List<Company> companyList) {
         return companyList.stream()
                 .max(comparing(Company::getEbitda));
     }
 
-    private Optional<Company> bestCompanyInSector(Sector sector) {
-        //return companies.stream()
-        //      .filter(company -> company.getSector().equals(sector))
-        //    .sorted(comparing(Company::getEbitda))
-        //  .limit(1)
-        //.findFirst();
+    /**
+     * For given sector returns a company with highest EBITDA from all companies.
+     *
+     * @param sector sector in which we're searching
+     * @return Optional wrapped around company with highest earnings in given
+     * sector, Optional.empty() if there are no companies in this sector
+     */
+    private Optional<Company> companyWithHighestEbitdaInSector(Sector sector) {
         List<Company> companiesInSector = companies.stream()
                 .filter(company -> company.getSector().equals(sector))
                 .collect(Collectors.toList());
-        return bestCompanyInList(companiesInSector);
+        return companyWithHighestEbitdaInList(companiesInSector);
     }
-
-//map     sector   company
-    //sectors  map  hashmap
-// map  .put
-
 
 //
 //    //1

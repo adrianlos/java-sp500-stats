@@ -3,8 +3,6 @@ package pl.sda.stats;
 import pl.sda.stats.company.Company;
 import pl.sda.stats.importing.CompanyImporter;
 
-import java.util.List;
-
 public class Main {
     public static void main(String[] args) {
 

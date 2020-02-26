@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @ToString
 @EqualsAndHashCode
 @Getter
-public class Company implements Comparable<Company>{
+public class Company implements Comparable<Company> {
     private String name;
     private Sector sector;
     private BigDecimal price;
