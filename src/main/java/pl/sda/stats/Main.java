@@ -2,11 +2,13 @@ package pl.sda.stats;
 
 import pl.sda.stats.company.Company;
 import pl.sda.stats.importing.CompanyImporter;
+import pl.sda.stats.importing.FromJSONCompanyImporter;
 
 public class Main {
     public static void main(String[] args) {
 
-        CompanyImporter companyImporter = new CompanyImporter("src/main/resources/constituents-financials_csv.csv");
+//        FromCSVCompanyImporter companyImporter = new FromCSVCompanyImporter("src/main/resources/constituents-financials_csv.csv");
+        CompanyImporter companyImporter = new FromJSONCompanyImporter("src/main/resources/constituents-financials_json.json");
         SP500Statistics sp500Statistics = new SP500Statistics(companyImporter.readCompanies());
         //List<Company> companiesWithHighestPrice = sp500Statistics.companiesWithHighestPrice(3);
         //List<Company> companiesWithHighestDividendYield = sp500Statistics.companiesWithHighestDividendYield(3);

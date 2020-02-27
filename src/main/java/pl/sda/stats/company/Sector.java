@@ -1,5 +1,7 @@
 package pl.sda.stats.company;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.stream.Stream;
 
 public enum Sector {
@@ -14,6 +16,7 @@ public enum Sector {
         this.name = name;
     }
 
+    @JsonCreator
     public static Sector fromString(String stringName) {
         return Stream.of(values())
                 .filter(sector -> sector.name.equals(stringName))
